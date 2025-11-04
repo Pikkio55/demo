@@ -6,12 +6,19 @@ function Campaigns() {
   const [campaigns, setCampaigns] = useState([]);
   const [leads, setLeads] = useState([]);
   const [assistants, setAssistants] = useState([]);
+  const [telnyxAssistants, setTelnyxAssistants] = useState([]);
+  const [phoneNumbers, setPhoneNumbers] = useState([]);
+  const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingTelnyx, setLoadingTelnyx] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     assistant_id: '',
+    telnyx_assistant_id: '',
+    phone_number: '',
+    connection_id: '',
     lead_ids: []
   });
 
@@ -36,13 +43,44 @@ function Campaigns() {
     }
   };
 
+  const loadTelnyxResources = async () => {
+    setLoadingTelnyx(true);
+    try {
+      const [assistantsRes, numbersRes, connectionsRes] = await Promise.all([
+        axios.get('/api/telnyx/assistants'),
+        axios.get('/api/telnyx/phone-numbers'),
+        axios.get('/api/telnyx/connections')
+      ]);
+      setTelnyxAssistants(assistantsRes.data);
+      setPhoneNumbers(numbersRes.data);
+      setConnections(connectionsRes.data);
+    } catch (error) {
+      console.error('Error loading Telnyx resources:', error);
+      alert('Errore nel caricamento delle risorse Telnyx. Verifica la tua API Key.');
+    }
+    setLoadingTelnyx(false);
+  };
+
+  const handleOpenModal = () => {
+    setShowModal(true);
+    loadTelnyxResources();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await axios.post('/api/campaigns', formData);
       alert('Campagna creata con successo!');
       setShowModal(false);
-      setFormData({ name: '', description: '', assistant_id: '', lead_ids: [] });
+      setFormData({
+        name: '',
+        description: '',
+        assistant_id: '',
+        telnyx_assistant_id: '',
+        phone_number: '',
+        connection_id: '',
+        lead_ids: []
+      });
       loadData();
     } catch (error) {
       alert('Errore durante la creazione: ' + error.message);
@@ -98,7 +136,7 @@ function Campaigns() {
     <div>
       <div className="page-header">
         <h2>Gestione Campagne</h2>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+        <button className="btn btn-primary" onClick={handleOpenModal}>
           Nuova Campagna
         </button>
       </div>
@@ -108,7 +146,7 @@ function Campaigns() {
           <div className="empty-state">
             <h3>Nessuna campagna creata</h3>
             <p>Crea la tua prima campagna outbound</p>
-            <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+            <button className="btn btn-primary" onClick={handleOpenModal}>
               Crea Campagna
             </button>
           </div>
@@ -205,20 +243,87 @@ function Campaigns() {
                   rows="3"
                 />
               </div>
+
+              {loadingTelnyx ? (
+                <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                  Caricamento risorse Telnyx...
+                </div>
+              ) : (
+                <>
+                  <div className="form-group">
+                    <label>Assistente AI Telnyx *</label>
+                    <select
+                      value={formData.telnyx_assistant_id}
+                      onChange={(e) => setFormData({ ...formData, telnyx_assistant_id: e.target.value })}
+                      required
+                    >
+                      <option value="">Seleziona assistente dal tuo account Telnyx</option>
+                      {telnyxAssistants.map(assistant => (
+                        <option key={assistant.id} value={assistant.id}>
+                          {assistant.name} ({assistant.id})
+                        </option>
+                      ))}
+                    </select>
+                    <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>
+                      Seleziona un assistente già configurato sul tuo account Telnyx
+                    </p>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Numero di Telefono *</label>
+                    <select
+                      value={formData.phone_number}
+                      onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+                      required
+                    >
+                      <option value="">Seleziona numero dal tuo account Telnyx</option>
+                      {phoneNumbers.map(number => (
+                        <option key={number.id} value={number.phone_number}>
+                          {number.phone_number} {number.friendly_name ? `(${number.friendly_name})` : ''}
+                        </option>
+                      ))}
+                    </select>
+                    <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>
+                      Numero che verrà usato per effettuare le chiamate
+                    </p>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Connection ID (Opzionale)</label>
+                    <select
+                      value={formData.connection_id}
+                      onChange={(e) => setFormData({ ...formData, connection_id: e.target.value })}
+                    >
+                      <option value="">Nessuna connection specifica</option>
+                      {connections.map(conn => (
+                        <option key={conn.id} value={conn.id}>
+                          {conn.connection_name || conn.id}
+                        </option>
+                      ))}
+                    </select>
+                    <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>
+                      Opzionale: Connection Telnyx specifica da usare
+                    </p>
+                  </div>
+                </>
+              )}
+
               <div className="form-group">
-                <label>Assistente AI *</label>
+                <label>Assistente AI Locale (Opzionale)</label>
                 <select
                   value={formData.assistant_id}
                   onChange={(e) => setFormData({ ...formData, assistant_id: e.target.value })}
-                  required
                 >
-                  <option value="">Seleziona un assistente</option>
+                  <option value="">Nessun assistente locale</option>
                   {assistants.map(assistant => (
                     <option key={assistant.id} value={assistant.id}>
                       {assistant.name}
                     </option>
                   ))}
                 </select>
+                <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>
+                  Seleziona solo se vuoi usare un assistente configurato localmente invece che Telnyx
+                </p>
               </div>
               <div className="form-group">
                 <label>Seleziona Lead</label>

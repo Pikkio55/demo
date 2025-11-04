@@ -10,6 +10,7 @@ const campaignsRouter = require('./routes/campaigns');
 const assistantsRouter = require('./routes/assistants');
 const appointmentsRouter = require('./routes/appointments');
 const webhooksRouter = require('./routes/webhooks');
+const telnyxRouter = require('./routes/telnyx');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -28,6 +29,7 @@ app.use('/api/campaigns', campaignsRouter);
 app.use('/api/assistants', assistantsRouter);
 app.use('/api/appointments', appointmentsRouter);
 app.use('/api/webhooks', webhooksRouter);
+app.use('/api/telnyx', telnyxRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {

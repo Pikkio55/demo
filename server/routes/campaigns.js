@@ -44,17 +44,17 @@ router.get('/:id', (req, res) => {
 
 // Create campaign
 router.post('/', (req, res) => {
-  const { name, description, assistant_id, lead_ids } = req.body;
+  const { name, description, assistant_id, telnyx_assistant_id, phone_number, connection_id, lead_ids } = req.body;
 
   if (!name) {
     return res.status(400).json({ error: 'Campaign name is required' });
   }
 
   const campaignId = uuidv4();
-  const sql = `INSERT INTO campaigns (id, name, description, assistant_id, total_leads)
-               VALUES (?, ?, ?, ?, ?)`;
+  const sql = `INSERT INTO campaigns (id, name, description, assistant_id, telnyx_assistant_id, phone_number, connection_id, total_leads)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
-  db.run(sql, [campaignId, name, description, assistant_id, lead_ids?.length || 0], function(err) {
+  db.run(sql, [campaignId, name, description, assistant_id, telnyx_assistant_id, phone_number, connection_id, lead_ids?.length || 0], function(err) {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
