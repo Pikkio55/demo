@@ -2,10 +2,22 @@
 
 Una webapp completa per gestire campagne outbound con assistenti AI di Telnyx. Gli assistenti chiamano automaticamente i lead e cercano di fissare appuntamenti telefonici.
 
+## 🚀 Integrazione Diretta con Telnyx
+
+**NOVITÀ**: La webapp si collega direttamente al tuo account Telnyx!
+
+- ✅ **Seleziona assistenti AI** già configurati sul tuo account Telnyx
+- ✅ **Scegli numeri di telefono** dal tuo account per ogni campagna
+- ✅ **Seleziona connections** specifiche (opzionale)
+- ✅ **Nessuna configurazione manuale**: Tutto viene caricato automaticamente dalla webapp
+
+👉 **[Guida Rapida di Utilizzo](QUICK_START.md)**
+
 ## Caratteristiche
 
 - **Gestione Lead**: Aggiungi lead manualmente o carica file CSV
-- **Assistenti AI**: Configura assistenti AI personalizzati con prompt specifici
+- **Integrazione Telnyx Diretta**: Seleziona assistenti, numeri e connections dal tuo account
+- **Assistenti AI**: Usa assistenti già configurati su Telnyx o creane di nuovi localmente
 - **Campagne Outbound**: Crea e gestisci campagne di chiamate automatiche
 - **Monitoraggio Real-time**: Dashboard con statistiche e KPI in tempo reale
 - **Gestione Appuntamenti**: Visualizza e gestisci tutti gli appuntamenti fissati
