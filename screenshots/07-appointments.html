@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appuntamenti - Telnyx Campaigns</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; background-color: #f5f5f5; }
+
+        .navbar {
+            background-color: #1a1a1a;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .navbar h1 { font-size: 24px; font-weight: 600; }
+        .navbar-links { display: flex; gap: 25px; }
+        .navbar-links a { color: white; text-decoration: none; font-weight: 500; }
+        .navbar-links a.active { color: #0066ff; }
+
+        .main-content { padding: 30px; max-width: 1400px; margin: 0 auto; }
+        .page-header { margin-bottom: 30px; }
+        .page-header h2 { font-size: 28px; color: #333; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .stat-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        .stat-card .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #333;
+        }
+        .stat-card .stat-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin-right: 10px;
+        }
+        .btn-primary { background-color: #0066ff; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <h1>📞 Telnyx Campaigns</h1>
+        </div>
+        <div class="navbar-links">
+            <a href="#">Dashboard</a>
+            <a href="#">Leads</a>
+            <a href="#">Campagne</a>
+            <a href="#">Assistenti AI</a>
+            <a href="#" class="active">Appuntamenti</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h2>Gestione Appuntamenti</h2>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Totale</h3>
+                <div class="stat-value">0</div>
+                <div class="stat-label">appuntamenti totali</div>
+            </div>
+            <div class="stat-card">
+                <h3>Programmati</h3>
+                <div class="stat-value">0</div>
+                <div class="stat-label">in attesa</div>
+            </div>
+            <div class="stat-card">
+                <h3>Completati</h3>
+                <div class="stat-value">0</div>
+                <div class="stat-label">già effettuati</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+                <button class="btn btn-primary btn-sm">Tutti</button>
+                <button class="btn btn-secondary btn-sm">Programmati</button>
+                <button class="btn btn-secondary btn-sm">Completati</button>
+                <button class="btn btn-secondary btn-sm">Cancellati</button>
+            </div>
+
+            <div class="empty-state">
+                <h3>Nessun appuntamento</h3>
+                <p>Gli appuntamenti fissati dagli assistenti AI appariranno qui</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
