@@ -65,6 +65,37 @@ La webapp sarà disponibile su: http://localhost:3000
 
 5. Clicca "Crea Campagna"
 
+### Step 2.5: Test Call (Consigliato)
+
+Prima di avviare una campagna completa, è altamente consigliato fare un test!
+
+#### Opzione A: Test Call dalla pagina Campagne
+
+1. Vai su **Campagne**
+2. Clicca "🧪 Test Call" (in alto a destra)
+3. La webapp caricherà le risorse Telnyx
+4. **Compila il form**:
+   - **Numero da Chiamare**: Inserisci il TUO numero di telefono
+   - **Assistente AI**: Seleziona l'assistente da testare
+   - **Numero Mittente**: Seleziona il numero che chiamerà
+   - **Connection ID**: (Opzionale)
+5. Clicca "📞 Chiama Ora"
+6. Riceverai la chiamata dall'assistente AI entro pochi secondi!
+
+#### Opzione B: Test Call dalla Campagna
+
+1. Apri una campagna già creata (clicca sul nome)
+2. Clicca "🧪 Test Call" (accanto allo status badge)
+3. Inserisci il TUO numero di telefono
+4. Clicca "📞 Chiama Ora"
+5. Il test userà automaticamente le risorse configurate nella campagna!
+
+**Vantaggi del Test Call:**
+- ✅ Verifica che l'assistente AI funzioni correttamente
+- ✅ Controlla che il numero di telefono sia attivo
+- ✅ Testa il prompt e il comportamento dell'assistente
+- ✅ Nessun tracking nel database (non crea lead o appuntamenti)
+
 ### Step 3: Avvia la Campagna
 
 1. Nella lista campagne, trova la campagna creata
@@ -191,6 +222,7 @@ WEBHOOK_URL=https://tuodominio.com/api/webhooks/telnyx
 - `GET /api/telnyx/phone-numbers` - Lista numeri di telefono
 - `GET /api/telnyx/connections` - Lista connections
 - `GET /api/telnyx/messaging-profiles` - Lista messaging profiles
+- `POST /api/telnyx/test-call` - Esegui chiamata di test (body: `{to, from, assistant_id, connection_id?}`)
 
 ### Campagne
 - `POST /api/campaigns` - Crea campagna con risorse Telnyx
@@ -207,11 +239,12 @@ Ogni campagna salva:
 
 ## Best Practices
 
-1. **Testa sempre prima**: Usa il tuo numero come lead di test
+1. **Testa sempre prima**: Usa il bottone "🧪 Test Call" per verificare la configurazione prima di avviare campagne
 2. **Monitora il credito**: Controlla il saldo Telnyx regolarmente
 3. **Configura webhook**: Per ricevere aggiornamenti real-time
 4. **Backup del database**: Fai backup regolari di `database.sqlite`
 5. **Rate limiting**: Il sistema aspetta 2 secondi tra chiamate, ma monitora i rate limits Telnyx
+6. **Verifica prompt**: Testa il comportamento dell'assistente AI prima di contattare i lead reali
 
 ## Supporto
 
