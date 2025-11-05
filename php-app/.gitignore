@@ -1,0 +1,12 @@
+# Database file
+database.sqlite
+
+# Config file with real API key (use config.php instead)
+config-with-key.php
+
+# Webhook logs
+webhook-log.txt
+
+# PHP cache
+*.cache
+.phpunit.result.cache
