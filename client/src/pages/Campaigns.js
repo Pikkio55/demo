@@ -12,6 +12,8 @@ function Campaigns() {
   const [loading, setLoading] = useState(true);
   const [loadingTelnyx, setLoadingTelnyx] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showTestCallModal, setShowTestCallModal] = useState(false);
+  const [testCallInProgress, setTestCallInProgress] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -20,6 +22,12 @@ function Campaigns() {
     phone_number: '',
     connection_id: '',
     lead_ids: []
+  });
+  const [testCallData, setTestCallData] = useState({
+    to: '',
+    from: '',
+    assistant_id: '',
+    connection_id: ''
   });
 
   useEffect(() => {
@@ -128,6 +136,38 @@ function Campaigns() {
     setFormData({ ...formData, lead_ids: newLeadIds });
   };
 
+  const handleOpenTestCallModal = () => {
+    setShowTestCallModal(true);
+    loadTelnyxResources();
+  };
+
+  const handleTestCall = async (e) => {
+    e.preventDefault();
+
+    if (!testCallData.to || !testCallData.from || !testCallData.assistant_id) {
+      alert('Compila tutti i campi obbligatori!');
+      return;
+    }
+
+    setTestCallInProgress(true);
+    try {
+      const response = await axios.post('/api/telnyx/test-call', testCallData);
+      alert(`✅ Chiamata di test avviata con successo!\n\nCall ID: ${response.data.call_id}\n\nDovresti ricevere la chiamata tra pochi secondi.`);
+      setShowTestCallModal(false);
+      setTestCallData({
+        to: '',
+        from: '',
+        assistant_id: '',
+        connection_id: ''
+      });
+    } catch (error) {
+      const errorMsg = error.response?.data?.error || error.message;
+      alert(`❌ Errore durante la chiamata di test:\n\n${errorMsg}`);
+    } finally {
+      setTestCallInProgress(false);
+    }
+  };
+
   if (loading) {
     return <div className="loading">Caricamento...</div>;
   }
@@ -136,9 +176,14 @@ function Campaigns() {
     <div>
       <div className="page-header">
         <h2>Gestione Campagne</h2>
-        <button className="btn btn-primary" onClick={handleOpenModal}>
-          Nuova Campagna
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="btn btn-secondary" onClick={handleOpenTestCallModal}>
+            🧪 Test Call
+          </button>
+          <button className="btn btn-primary" onClick={handleOpenModal}>
+            Nuova Campagna
+          </button>
+        </div>
       </div>
 
       <div className="card">
@@ -349,6 +394,112 @@ function Campaigns() {
               <div className="action-buttons">
                 <button type="submit" className="btn btn-primary">Crea Campagna</button>
                 <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                  Annulla
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Test Call Modal */}
+      {showTestCallModal && (
+        <div className="modal-overlay" onClick={() => setShowTestCallModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+            <div className="modal-header">
+              <h3>🧪 Chiamata di Test</h3>
+              <button className="close-btn" onClick={() => setShowTestCallModal(false)}>&times;</button>
+            </div>
+
+            <p style={{ marginBottom: '20px', color: '#666', fontSize: '14px' }}>
+              Esegui una chiamata di test per verificare che tutto funzioni correttamente.
+              Inserisci il tuo numero di telefono per ricevere la chiamata dall'assistente AI.
+            </p>
+
+            <form onSubmit={handleTestCall}>
+              {loadingTelnyx ? (
+                <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                  Caricamento risorse Telnyx...
+                </div>
+              ) : (
+                <>
+                  <div className="form-group">
+                    <label>Numero da Chiamare (Il tuo numero) *</label>
+                    <input
+                      type="tel"
+                      value={testCallData.to}
+                      onChange={(e) => setTestCallData({ ...testCallData, to: e.target.value })}
+                      placeholder="+393331234567"
+                      required
+                    />
+                    <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>
+                      Formato internazionale (es. +39 per Italia, +1 per USA)
+                    </p>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Assistente AI *</label>
+                    <select
+                      value={testCallData.assistant_id}
+                      onChange={(e) => setTestCallData({ ...testCallData, assistant_id: e.target.value })}
+                      required
+                    >
+                      <option value="">Seleziona assistente dal tuo account Telnyx</option>
+                      {telnyxAssistants.map(assistant => (
+                        <option key={assistant.id} value={assistant.id}>
+                          {assistant.name} ({assistant.id})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Numero Mittente *</label>
+                    <select
+                      value={testCallData.from}
+                      onChange={(e) => setTestCallData({ ...testCallData, from: e.target.value })}
+                      required
+                    >
+                      <option value="">Seleziona numero dal tuo account Telnyx</option>
+                      {phoneNumbers.map(number => (
+                        <option key={number.id} value={number.phone_number}>
+                          {number.phone_number} {number.friendly_name ? `(${number.friendly_name})` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Connection ID (Opzionale)</label>
+                    <select
+                      value={testCallData.connection_id}
+                      onChange={(e) => setTestCallData({ ...testCallData, connection_id: e.target.value })}
+                    >
+                      <option value="">Nessuna connection specifica</option>
+                      {connections.map(conn => (
+                        <option key={conn.id} value={conn.id}>
+                          {conn.connection_name || conn.id}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
+
+              <div className="action-buttons">
+                <button
+                  type="submit"
+                  className="btn btn-success"
+                  disabled={testCallInProgress}
+                >
+                  {testCallInProgress ? 'Chiamata in corso...' : '📞 Chiama Ora'}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowTestCallModal(false)}
+                  disabled={testCallInProgress}
+                >
                   Annulla
                 </button>
               </div>

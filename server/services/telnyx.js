@@ -284,10 +284,42 @@ async function makeCallWithResources(toNumber, fromNumber, assistantId, campaign
   }
 }
 
+/**
+ * Make a test call (no database tracking)
+ */
+async function makeTestCall(toNumber, fromNumber, assistantId, connectionId = null) {
+  try {
+    const payload = {
+      to: toNumber,
+      from: fromNumber,
+      assistant_id: assistantId,
+      webhook_url: process.env.WEBHOOK_URL,
+      record: 'record-from-answer'
+    };
+
+    // Add connection_id if provided
+    if (connectionId) {
+      payload.connection_id = connectionId;
+    }
+
+    console.log(`🧪 Making test call to ${toNumber} from ${fromNumber} with assistant ${assistantId}`);
+
+    const response = await telnyxClient.post('/calls', payload);
+    const callId = response.data.data.call_control_id;
+
+    console.log(`✅ Test call initiated successfully, call_id: ${callId}`);
+    return response.data.data;
+  } catch (error) {
+    console.error('Error making test call:', error.response?.data || error.message);
+    throw error;
+  }
+}
+
 module.exports = {
   createOrUpdateAssistant,
   makeCall,
   makeCallWithResources,
+  makeTestCall,
   startCampaignCalls,
   getCallDetails,
   hangupCall,

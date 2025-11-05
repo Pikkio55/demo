@@ -52,4 +52,38 @@ router.get('/connections', async (req, res) => {
   }
 });
 
+// Make a test call
+router.post('/test-call', async (req, res) => {
+  try {
+    const { to, from, assistant_id, connection_id } = req.body;
+
+    if (!to || !from || !assistant_id) {
+      return res.status(400).json({
+        error: 'Missing required fields: to, from, assistant_id'
+      });
+    }
+
+    // Validate phone number format
+    if (!to.startsWith('+')) {
+      return res.status(400).json({
+        error: 'Phone number must be in international format (e.g., +393331234567)'
+      });
+    }
+
+    const result = await telnyxService.makeTestCall(to, from, assistant_id, connection_id);
+
+    res.json({
+      success: true,
+      message: 'Test call initiated successfully',
+      call_id: result.call_control_id,
+      data: result
+    });
+  } catch (error) {
+    console.error('Error making test call:', error);
+    res.status(500).json({
+      error: error.response?.data?.errors?.[0]?.detail || error.message
+    });
+  }
+});
+
 module.exports = router;
