@@ -1,0 +1,40 @@
+# Enable Rewrite Engine
+RewriteEngine On
+
+# Redirect to index.php if accessing root
+DirectoryIndex index.php
+
+# Protect sensitive files
+<FilesMatch "^(config\.php|init-db\.php|database\.sqlite|\.htaccess)$">
+    Order Allow,Deny
+    Deny from all
+    # Allow init-db.php only for initial setup (remove this line after setup)
+    <FilesMatch "^init-db\.php$">
+        Allow from all
+    </FilesMatch>
+</FilesMatch>
+
+# Protect database file
+<Files "database.sqlite">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Enable CORS for API requests
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+</IfModule>
+
+# PHP Settings
+<IfModule mod_php7.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 10M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+</IfModule>
+
+# Custom error pages
+ErrorDocument 404 /index.php
+ErrorDocument 500 /index.php

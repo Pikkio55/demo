@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Call Modal - Telnyx Campaigns</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; background-color: #f5f5f5; }
+
+        .navbar {
+            background-color: #1a1a1a;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .navbar h1 { font-size: 24px; font-weight: 600; }
+        .navbar-links { display: flex; gap: 25px; }
+        .navbar-links a { color: white; text-decoration: none; font-weight: 500; }
+
+        .main-content { padding: 30px; max-width: 1400px; margin: 0 auto; }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            font-size: 20px;
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 14px;
+            color: #333;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .helper-text {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .btn-success { background-color: #28a745; color: white; margin-right: 10px; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <h1>📞 Telnyx Campaigns</h1>
+        </div>
+        <div class="navbar-links">
+            <a href="#">Dashboard</a>
+            <a href="#">Leads</a>
+            <a href="#">Campagne</a>
+            <a href="#">Assistenti AI</a>
+            <a href="#">Appuntamenti</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <h2>Gestione Campagne</h2>
+    </div>
+
+    <div class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>🧪 Chiamata di Test</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+
+            <p style="margin-bottom: 20px; color: #666; font-size: 14px;">
+                Esegui una chiamata di test per verificare che tutto funzioni correttamente.
+                Inserisci il tuo numero di telefono per ricevere la chiamata dall'assistente AI.
+            </p>
+
+            <form>
+                <div class="form-group">
+                    <label>Numero da Chiamare (Il tuo numero) *</label>
+                    <input type="tel" placeholder="+393331234567" required>
+                    <div class="helper-text">
+                        Formato internazionale (es. +39 per Italia, +1 per USA)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Assistente AI *</label>
+                    <select required>
+                        <option value="">Seleziona assistente dal tuo account Telnyx</option>
+                        <option>Assistente Vendite (asst_abc123...)</option>
+                        <option>Assistente Supporto (asst_def456...)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Numero Mittente *</label>
+                    <select required>
+                        <option value="">Seleziona numero dal tuo account Telnyx</option>
+                        <option>+39 02 1234567 (Milano Office)</option>
+                        <option>+39 06 9876543 (Roma Office)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Connection ID (Opzionale)</label>
+                    <select>
+                        <option value="">Nessuna connection specifica</option>
+                        <option>conn_xyz789 (Primary)</option>
+                        <option>conn_abc123 (Secondary)</option>
+                    </select>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-success">📞 Chiama Ora</button>
+                    <button type="button" class="btn btn-secondary">Annulla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

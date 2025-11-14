@@ -1,0 +1,514 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
+
+function Campaigns() {
+  const [campaigns, setCampaigns] = useState([]);
+  const [leads, setLeads] = useState([]);
+  const [assistants, setAssistants] = useState([]);
+  const [telnyxAssistants, setTelnyxAssistants] = useState([]);
+  const [phoneNumbers, setPhoneNumbers] = useState([]);
+  const [connections, setConnections] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingTelnyx, setLoadingTelnyx] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [showTestCallModal, setShowTestCallModal] = useState(false);
+  const [testCallInProgress, setTestCallInProgress] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    assistant_id: '',
+    telnyx_assistant_id: '',
+    phone_number: '',
+    connection_id: '',
+    lead_ids: []
+  });
+  const [testCallData, setTestCallData] = useState({
+    to: '',
+    from: '',
+    assistant_id: '',
+    connection_id: ''
+  });
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [campaignsRes, leadsRes, assistantsRes] = await Promise.all([
+        axios.get('/api/campaigns'),
+        axios.get('/api/leads'),
+        axios.get('/api/assistants')
+      ]);
+      setCampaigns(campaignsRes.data);
+      setLeads(leadsRes.data);
+      setAssistants(assistantsRes.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      setLoading(false);
+    }
+  };
+
+  const loadTelnyxResources = async () => {
+    setLoadingTelnyx(true);
+    try {
+      const [assistantsRes, numbersRes, connectionsRes] = await Promise.all([
+        axios.get('/api/telnyx/assistants'),
+        axios.get('/api/telnyx/phone-numbers'),
+        axios.get('/api/telnyx/connections')
+      ]);
+      setTelnyxAssistants(assistantsRes.data);
+      setPhoneNumbers(numbersRes.data);
+      setConnections(connectionsRes.data);
+    } catch (error) {
+      console.error('Error loading Telnyx resources:', error);
+      alert('Errore nel caricamento delle risorse Telnyx. Verifica la tua API Key.');
+    }
+    setLoadingTelnyx(false);
+  };
+
+  const handleOpenModal = () => {
+    setShowModal(true);
+    loadTelnyxResources();
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('/api/campaigns', formData);
+      alert('Campagna creata con successo!');
+      setShowModal(false);
+      setFormData({
+        name: '',
+        description: '',
+        assistant_id: '',
+        telnyx_assistant_id: '',
+        phone_number: '',
+        connection_id: '',
+        lead_ids: []
+      });
+      loadData();
+    } catch (error) {
+      alert('Errore durante la creazione: ' + error.message);
+    }
+  };
+
+  const handleStartCampaign = async (id) => {
+    if (!window.confirm('Avviare questa campagna?')) return;
+
+    try {
+      const response = await axios.post(`/api/campaigns/${id}/start`);
+      alert(response.data.message);
+      loadData();
+    } catch (error) {
+      alert('Errore: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
+  const handlePauseCampaign = async (id) => {
+    try {
+      await axios.post(`/api/campaigns/${id}/pause`);
+      alert('Campagna messa in pausa!');
+      loadData();
+    } catch (error) {
+      alert('Errore: ' + error.message);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Sei sicuro di voler eliminare questa campagna?')) return;
+
+    try {
+      await axios.delete(`/api/campaigns/${id}`);
+      alert('Campagna eliminata con successo!');
+      loadData();
+    } catch (error) {
+      alert('Errore durante l\'eliminazione: ' + error.message);
+    }
+  };
+
+  const handleLeadSelection = (leadId) => {
+    const newLeadIds = formData.lead_ids.includes(leadId)
+      ? formData.lead_ids.filter(id => id !== leadId)
+      : [...formData.lead_ids, leadId];
+    setFormData({ ...formData, lead_ids: newLeadIds });
+  };
+
+  const handleOpenTestCallModal = () => {
+    setShowTestCallModal(true);
+    loadTelnyxResources();
+  };
+
+  const handleTestCall = async (e) => {
+    e.preventDefault();
+
+    if (!testCallData.to || !testCallData.from || !testCallData.assistant_id) {
+      alert('Compila tutti i campi obbligatori!');
+      return;
+    }
+
+    setTestCallInProgress(true);
+    try {
+      const response = await axios.post('/api/telnyx/test-call', testCallData);
+      alert(`✅ Chiamata di test avviata con successo!\n\nCall ID: ${response.data.call_id}\n\nDovresti ricevere la chiamata tra pochi secondi.`);
+      setShowTestCallModal(false);
+      setTestCallData({
+        to: '',
+        from: '',
+        assistant_id: '',
+        connection_id: ''
+      });
+    } catch (error) {
+      const errorMsg = error.response?.data?.error || error.message;
+      alert(`❌ Errore durante la chiamata di test:\n\n${errorMsg}`);
+    } finally {
+      setTestCallInProgress(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="loading">Caricamento...</div>;
+  }
+
+  return (
+    <div>
+      <div className="page-header">
+        <h2>Gestione Campagne</h2>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="btn btn-secondary" onClick={handleOpenTestCallModal}>
+            🧪 Test Call
+          </button>
+          <button className="btn btn-primary" onClick={handleOpenModal}>
+            Nuova Campagna
+          </button>
+        </div>
+      </div>
+
+      <div className="card">
+        {campaigns.length === 0 ? (
+          <div className="empty-state">
+            <h3>Nessuna campagna creata</h3>
+            <p>Crea la tua prima campagna outbound</p>
+            <button className="btn btn-primary" onClick={handleOpenModal}>
+              Crea Campagna
+            </button>
+          </div>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Stato</th>
+                <th>Lead</th>
+                <th>Chiamate</th>
+                <th>Appuntamenti</th>
+                <th>Tasso Conv.</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody>
+              {campaigns.map(campaign => (
+                <tr key={campaign.id}>
+                  <td>
+                    <Link to={`/campaigns/${campaign.id}`} style={{ color: '#0066ff', textDecoration: 'none' }}>
+                      {campaign.name}
+                    </Link>
+                  </td>
+                  <td>
+                    <span className={`status-badge status-${campaign.status}`}>
+                      {campaign.status}
+                    </span>
+                  </td>
+                  <td>{campaign.total_leads}</td>
+                  <td>{campaign.called_leads}</td>
+                  <td>{campaign.successful_appointments}</td>
+                  <td>
+                    {campaign.called_leads > 0
+                      ? `${Math.round((campaign.successful_appointments / campaign.called_leads) * 100)}%`
+                      : '0%'}
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '5px' }}>
+                      {campaign.status === 'draft' || campaign.status === 'paused' ? (
+                        <button
+                          className="btn btn-success btn-sm"
+                          onClick={() => handleStartCampaign(campaign.id)}
+                        >
+                          Avvia
+                        </button>
+                      ) : null}
+                      {campaign.status === 'active' ? (
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => handlePauseCampaign(campaign.id)}
+                        >
+                          Pausa
+                        </button>
+                      ) : null}
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleDelete(campaign.id)}
+                      >
+                        Elimina
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* Create Campaign Modal */}
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '800px' }}>
+            <div className="modal-header">
+              <h3>Crea Nuova Campagna</h3>
+              <button className="close-btn" onClick={() => setShowModal(false)}>&times;</button>
+            </div>
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label>Nome Campagna *</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Descrizione</label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  rows="3"
+                />
+              </div>
+
+              {loadingTelnyx ? (
+                <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                  Caricamento risorse Telnyx...
+                </div>
+              ) : (
+                <>
+                  <div className="form-group">
+                    <label>Assistente AI Telnyx *</label>
+                    <select
+                      value={formData.telnyx_assistant_id}
+                      onChange={(e) => setFormData({ ...formData, telnyx_assistant_id: e.target.value })}
+                      required
+                    >
+                      <option value="">Seleziona assistente dal tuo account Telnyx</option>
+                      {telnyxAssistants.map(assistant => (
+                        <option key={assistant.id} value={assistant.id}>
+                          {assistant.name} ({assistant.id})
+                        </option>
+                      ))}
+                    </select>
+                    <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>
+                      Seleziona un assistente già configurato sul tuo account Telnyx
+                    </p>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Numero di Telefono *</label>
+                    <select
+                      value={formData.phone_number}
+                      onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+                      required
+                    >
+                      <option value="">Seleziona numero dal tuo account Telnyx</option>
+                      {phoneNumbers.map(number => (
+                        <option key={number.id} value={number.phone_number}>
+                          {number.phone_number} {number.friendly_name ? `(${number.friendly_name})` : ''}
+                        </option>
+                      ))}
+                    </select>
+                    <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>
+                      Numero che verrà usato per effettuare le chiamate
+                    </p>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Connection ID (Opzionale)</label>
+                    <select
+                      value={formData.connection_id}
+                      onChange={(e) => setFormData({ ...formData, connection_id: e.target.value })}
+                    >
+                      <option value="">Nessuna connection specifica</option>
+                      {connections.map(conn => (
+                        <option key={conn.id} value={conn.id}>
+                          {conn.connection_name || conn.id}
+                        </option>
+                      ))}
+                    </select>
+                    <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>
+                      Opzionale: Connection Telnyx specifica da usare
+                    </p>
+                  </div>
+                </>
+              )}
+
+              <div className="form-group">
+                <label>Assistente AI Locale (Opzionale)</label>
+                <select
+                  value={formData.assistant_id}
+                  onChange={(e) => setFormData({ ...formData, assistant_id: e.target.value })}
+                >
+                  <option value="">Nessun assistente locale</option>
+                  {assistants.map(assistant => (
+                    <option key={assistant.id} value={assistant.id}>
+                      {assistant.name}
+                    </option>
+                  ))}
+                </select>
+                <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>
+                  Seleziona solo se vuoi usare un assistente configurato localmente invece che Telnyx
+                </p>
+              </div>
+              <div className="form-group">
+                <label>Seleziona Lead</label>
+                <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #ddd', borderRadius: '6px', padding: '10px' }}>
+                  {leads.map(lead => (
+                    <div key={lead.id} style={{ marginBottom: '8px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={formData.lead_ids.includes(lead.id)}
+                          onChange={() => handleLeadSelection(lead.id)}
+                          style={{ marginRight: '10px', width: 'auto' }}
+                        />
+                        {lead.first_name} {lead.last_name} - {lead.phone_number}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>
+                  {formData.lead_ids.length} lead selezionati
+                </p>
+              </div>
+              <div className="action-buttons">
+                <button type="submit" className="btn btn-primary">Crea Campagna</button>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                  Annulla
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Test Call Modal */}
+      {showTestCallModal && (
+        <div className="modal-overlay" onClick={() => setShowTestCallModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+            <div className="modal-header">
+              <h3>🧪 Chiamata di Test</h3>
+              <button className="close-btn" onClick={() => setShowTestCallModal(false)}>&times;</button>
+            </div>
+
+            <p style={{ marginBottom: '20px', color: '#666', fontSize: '14px' }}>
+              Esegui una chiamata di test per verificare che tutto funzioni correttamente.
+              Inserisci il tuo numero di telefono per ricevere la chiamata dall'assistente AI.
+            </p>
+
+            <form onSubmit={handleTestCall}>
+              {loadingTelnyx ? (
+                <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                  Caricamento risorse Telnyx...
+                </div>
+              ) : (
+                <>
+                  <div className="form-group">
+                    <label>Numero da Chiamare (Il tuo numero) *</label>
+                    <input
+                      type="tel"
+                      value={testCallData.to}
+                      onChange={(e) => setTestCallData({ ...testCallData, to: e.target.value })}
+                      placeholder="+393331234567"
+                      required
+                    />
+                    <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>
+                      Formato internazionale (es. +39 per Italia, +1 per USA)
+                    </p>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Assistente AI *</label>
+                    <select
+                      value={testCallData.assistant_id}
+                      onChange={(e) => setTestCallData({ ...testCallData, assistant_id: e.target.value })}
+                      required
+                    >
+                      <option value="">Seleziona assistente dal tuo account Telnyx</option>
+                      {telnyxAssistants.map(assistant => (
+                        <option key={assistant.id} value={assistant.id}>
+                          {assistant.name} ({assistant.id})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Numero Mittente *</label>
+                    <select
+                      value={testCallData.from}
+                      onChange={(e) => setTestCallData({ ...testCallData, from: e.target.value })}
+                      required
+                    >
+                      <option value="">Seleziona numero dal tuo account Telnyx</option>
+                      {phoneNumbers.map(number => (
+                        <option key={number.id} value={number.phone_number}>
+                          {number.phone_number} {number.friendly_name ? `(${number.friendly_name})` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Connection ID (Opzionale)</label>
+                    <select
+                      value={testCallData.connection_id}
+                      onChange={(e) => setTestCallData({ ...testCallData, connection_id: e.target.value })}
+                    >
+                      <option value="">Nessuna connection specifica</option>
+                      {connections.map(conn => (
+                        <option key={conn.id} value={conn.id}>
+                          {conn.connection_name || conn.id}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
+
+              <div className="action-buttons">
+                <button
+                  type="submit"
+                  className="btn btn-success"
+                  disabled={testCallInProgress}
+                >
+                  {testCallInProgress ? 'Chiamata in corso...' : '📞 Chiama Ora'}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowTestCallModal(false)}
+                  disabled={testCallInProgress}
+                >
+                  Annulla
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Campaigns;

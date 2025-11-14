@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistenti AI - Telnyx Campaigns</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; background-color: #f5f5f5; }
+
+        .navbar {
+            background-color: #1a1a1a;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .navbar h1 { font-size: 24px; font-weight: 600; }
+        .navbar-links { display: flex; gap: 25px; }
+        .navbar-links a { color: white; text-decoration: none; font-weight: 500; }
+        .navbar-links a.active { color: #0066ff; }
+
+        .main-content { padding: 30px; max-width: 1400px; margin: 0 auto; }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .page-header h2 { font-size: 28px; color: #333; }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .btn-primary { background-color: #0066ff; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .assistant-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .assistant-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .prompt-box {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .prompt-box h4 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #666;
+        }
+
+        .prompt-box p {
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <h1>📞 Telnyx Campaigns</h1>
+        </div>
+        <div class="navbar-links">
+            <a href="#">Dashboard</a>
+            <a href="#">Leads</a>
+            <a href="#">Campagne</a>
+            <a href="#" class="active">Assistenti AI</a>
+            <a href="#">Appuntamenti</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h2>Assistenti AI</h2>
+            <button class="btn btn-primary">Crea Assistente</button>
+        </div>
+
+        <div class="card">
+            <div class="assistant-card">
+                <div class="assistant-header">
+                    <div>
+                        <h3 style="margin-bottom: 5px;">Assistente Vendite</h3>
+                        <p style="color: #666; font-size: 14px;">
+                            Voce: alloy | Lingua: it | Durata max: 300s
+                        </p>
+                    </div>
+                    <button class="btn btn-danger btn-sm">Elimina</button>
+                </div>
+                <div class="prompt-box">
+                    <h4>Prompt:</h4>
+                    <p>Ciao! Sono un assistente per fissare appuntamenti.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
